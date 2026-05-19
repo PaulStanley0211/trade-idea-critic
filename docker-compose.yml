@@ -1,0 +1,37 @@
+# Local development services: Postgres + Redis.
+# Production uses Neon (Postgres) and Upstash (Redis) — this file is dev-only.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: critic_postgres
+    environment:
+      POSTGRES_USER: critic
+      POSTGRES_PASSWORD: critic
+      POSTGRES_DB: critic
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U critic -d critic"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: critic_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:

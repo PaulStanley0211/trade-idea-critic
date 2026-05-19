@@ -1,0 +1,60 @@
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
+
+# Python / uv
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+.turbo/
+.vercel
+
+# LLM cache (path-configurable via LLM_CACHE_DIR; default location)
+backend/.llm_cache/
+
+# Test artifacts
+playwright-report/
+test-results/
+backend/tests/fixtures/cassettes/*.tmp
+
+# Observability / logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Misc
+*.swp
+*.swo
+*~

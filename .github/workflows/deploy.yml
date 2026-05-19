@@ -1,0 +1,26 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Vercel handles the frontend via its own GitHub integration — this workflow
+# only ships the backend to Fly.io. Vercel auto-deploys on push to main.
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  backend:
+    name: Deploy backend to Fly.io
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy
+        working-directory: backend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only

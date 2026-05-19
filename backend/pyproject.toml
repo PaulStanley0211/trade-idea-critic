@@ -1,0 +1,145 @@
+[project]
+name = "trade-idea-critic-backend"
+version = "0.1.0"
+description = "Agentic critic for trader theses. US, India, Germany equities."
+authors = [{ name = "Paul Stanley Ganganapalli", email = "paulstanleyganganapalli@gmail.com" }]
+license = { text = "MIT" }
+readme = "../README.md"
+requires-python = ">=3.11,<3.14"
+
+dependencies = [
+    # Web framework + ASGI
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sse-starlette>=2.1",
+    "python-multipart>=0.0.20",
+
+    # Agent orchestration
+    "langgraph>=0.2.50",
+    "anthropic>=0.39",
+
+    # Data validation + config
+    "pydantic>=2.10",
+    "pydantic-settings>=2.6",
+
+    # Database
+    "sqlalchemy[asyncio]>=2.0.36",
+    "alembic>=1.14",
+    "asyncpg>=0.30",
+
+    # Queue + cache
+    "redis>=5.2",
+    "rq>=2.0",
+
+    # Market data + tools
+    "yfinance>=0.2.50",
+    "pandas>=2.2",
+    "httpx>=0.28",
+
+    # Identifiers
+    "uuid-utils>=0.10",
+
+    # Observability
+    "loguru>=0.7",
+    "opentelemetry-api>=1.29",
+    "opentelemetry-sdk>=1.29",
+    "opentelemetry-exporter-otlp>=1.29",
+    "opentelemetry-instrumentation-fastapi>=0.50b0",
+    "logfire>=2.7",
+    "sentry-sdk[fastapi]>=2.18",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "pytest-mock>=3.14",
+    "hypothesis>=6.122",
+    "respx>=0.22",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "types-redis",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+# --- Ruff -------------------------------------------------------------------
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "C4",       # comprehensions
+    "UP",       # pyupgrade
+    "S",        # bandit-ish security
+    "SIM",      # simplifications
+    "RUF",      # ruff-specific
+    "T20",      # no print statements
+    "PL",       # pylint subset
+    "ASYNC",    # async correctness
+]
+ignore = [
+    "S101",     # assert used (fine in tests)
+    "PLR0913",  # too many args (we have agent nodes with many fields)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "PLR2004"]
+"app/scripts/**" = ["T201"]
+
+# --- Mypy -------------------------------------------------------------------
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["yfinance.*", "rq.*"]
+ignore_missing_imports = true
+
+# --- Pytest -----------------------------------------------------------------
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+markers = [
+    "integration: integration tests (DB + Redis + cassettes)",
+    "slow: tests slower than ~1s",
+]
+
+# --- Coverage ---------------------------------------------------------------
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+omit = ["app/scripts/*", "*/migrations/*"]
+
+[tool.coverage.report]
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]

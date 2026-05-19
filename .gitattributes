@@ -1,0 +1,29 @@
+# Default: normalize text to LF in repo, check out platform-native.
+* text=auto eol=lf
+
+# Force LF for shell scripts, Dockerfiles, YAML, TOML, JSON, Python, TS, configs.
+*.sh    text eol=lf
+*.py    text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.toml  text eol=lf
+*.md    text eol=lf
+Dockerfile text eol=lf
+
+# Treat lockfiles as text but never diff them by default (they are noisy).
+uv.lock           text -diff
+package-lock.json text -diff
+
+# Binary-ish.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.svg  text eol=lf
+*.ico  binary
+*.pdf  binary
