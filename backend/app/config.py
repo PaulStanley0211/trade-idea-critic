@@ -29,7 +29,10 @@ class Settings(BaseSettings):
     anthropic_api_key: str = Field(..., description="Anthropic API key for Opus and Sonnet.")
     database_url: str = Field(..., description="Postgres async DSN (postgresql+asyncpg://...).")
     redis_url: str = Field(..., description="Redis DSN (redis://...).")
-    edgar_user_agent: str = Field(..., description="Contact User-Agent for SEC EDGAR ('Name email').")
+    edgar_user_agent: str = Field(
+        ...,
+        description="Contact User-Agent for SEC EDGAR ('Name email').",
+    )
     newsapi_key: str = Field("", description="NewsAPI key. Optional in dev; required in prod.")
 
     max_daily_llm_cost_usd: float = Field(10.00, ge=0.0)
@@ -47,4 +50,4 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Return the parsed settings singleton."""
-    return Settings()  # type: ignore[call-arg]
+    return Settings()
