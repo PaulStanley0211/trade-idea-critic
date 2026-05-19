@@ -131,14 +131,27 @@ class BaseRateFinding(BaseModel):
     hit_rate: float = Field(..., ge=0.0, le=1.0)
 
 
+class SetupCritique(BaseModel):
+    """Output of the setup specialist (ORB / S/R / generic)."""
+
+    setup: SetupKind
+    quality: Verdict
+    checks: list[dict[str, str]] = Field(
+        default_factory=list,
+        description="Per-rule check rows, each {rule, status, evidence}.",
+    )
+    narrative: str
+
+
 class CritiqueSections(BaseModel):
-    """The four-section critique body."""
+    """The four-section critique body, plus base-rate context."""
 
     mechanics: StructureFinding
     stress_test: list[StressTestClaim] = Field(default_factory=list)
     bias: list[BiasFinding] = Field(default_factory=list)
     disconfirming: list[DisconfirmingItem] = Field(default_factory=list)
     base_rates: list[BaseRateFinding] = Field(default_factory=list)
+    setup_critique: SetupCritique | None = None
 
 
 # --- Full response (returned by GET when status != pending) ----------------

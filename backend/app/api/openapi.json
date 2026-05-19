@@ -256,7 +256,7 @@
         "type": "object"
       },
       "CritiqueSections": {
-        "description": "The four-section critique body.",
+        "description": "The four-section critique body, plus base-rate context.",
         "properties": {
           "base_rates": {
             "items": {
@@ -281,6 +281,16 @@
           },
           "mechanics": {
             "$ref": "#/components/schemas/StructureFinding"
+          },
+          "setup_critique": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SetupCritique"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "stress_test": {
             "items": {
@@ -489,6 +499,51 @@
           "setup"
         ],
         "title": "ParsedThesis",
+        "type": "object"
+      },
+      "SetupCritique": {
+        "description": "Output of the setup specialist (ORB / S/R / generic).",
+        "properties": {
+          "checks": {
+            "description": "Per-rule check rows, each {rule, status, evidence}.",
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "narrative": {
+            "title": "Narrative",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "strong",
+              "marginal",
+              "weak"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "setup": {
+            "enum": [
+              "orb",
+              "sr_bounce",
+              "other"
+            ],
+            "title": "Setup",
+            "type": "string"
+          }
+        },
+        "required": [
+          "setup",
+          "quality",
+          "narrative"
+        ],
+        "title": "SetupCritique",
         "type": "object"
       },
       "StressTestClaim": {
@@ -735,7 +790,7 @@
     },
     "/api/v1/critique/{request_id}/stream": {
       "get": {
-        "description": "Emit `status`, `node_started`, `node_completed`, `final` events.\n\nThe W1.2 stub emits a canned timeline of events spaced 200ms apart, then a\n`final` event carrying the same response that `GET /critique/{id}` returns.",
+        "description": "Emit `status`, `node_started`, `node_completed`, `final` (or `error`) events.\n\nIf the run is already finished, a single `final` (or `error`) event is sent\nand the stream closes.",
         "operationId": "stream_critique_api_v1_critique__request_id__stream_get",
         "parameters": [
           {

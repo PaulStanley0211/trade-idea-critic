@@ -1,8 +1,11 @@
-"""Smoke tests for the Phase 1.2 critique stub endpoints.
+"""Smoke tests for the critique endpoints driven by the LangGraph stub.
 
-These confirm the API shape only. Phase 1.3 introduces full LangGraph wiring
-and integration tests with cassettes; these unit tests will keep covering the
-HTTP contract.
+The graph runs in a FastAPI background task; TestClient blocks until the
+background task completes before returning, so the GET right after POST
+deterministically sees the final response.
+
+Phase 2 swaps node bodies for real implementations and adds integration tests
+with cassette replay; these unit tests will continue to cover the HTTP contract.
 """
 
 from fastapi.testclient import TestClient
@@ -20,11 +23,11 @@ def test_post_returns_queued_with_request_id() -> None:
     assert response.status_code == 202
     body = response.json()
     assert body["status"] == "queued"
-    assert len(body["request_id"]) == 36  # UUID string form
+    assert len(body["request_id"]) == 36
 
 
-def test_get_returns_canned_response_for_known_id() -> None:
-    """GET /api/v1/critique/{id} returns the canned stub critique."""
+def test_get_returns_final_response_after_graph_run() -> None:
+    """The graph populates parsed_thesis, sections, and a verdict end-to-end."""
     client = TestClient(app)
     post = client.post(
         "/api/v1/critique",
@@ -35,9 +38,11 @@ def test_get_returns_canned_response_for_known_id() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["request_id"] == request_id
-    assert body["status"] == "complete"
+    assert body["status"] in {"complete", "partial"}
     assert body["verdict"] in {"strong", "marginal", "weak"}
-    assert "w1.2_stub_response" in body["gap_flags"]
+    assert body["parsed_thesis"]["ticker"] == "AAPL"
+    assert body["sections"]["mechanics"]["rr_ratio"] == 2.0
+    assert body["sections"]["setup_critique"]["setup"] == "orb"
 
 
 def test_get_unknown_id_returns_404() -> None:
